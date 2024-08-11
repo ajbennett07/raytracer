@@ -19,13 +19,13 @@ impl Interval {
 		Self{a:min, b: max}
 	}
 	pub fn contains(&self, x: f64) -> bool {
-		if x <= self.b && x >= self.a {
+		if (x <= self.b) && (x >= self.a) {
 			return true;
 		}
 		false
 	}
 	pub fn surrounds(&self, x: f64) -> bool {
-		if x < self.b && x > self.a {
+		if (x < self.b) && (x > self.a) {
 			return true;
 		}
 		false
@@ -60,8 +60,8 @@ impl Hittable for Sphere {
 			return None;
 		}
 		let mut ret = Hit::new();
-		if t_int.contains(h - disc.sqrt() / a) {
-			if t_int.contains((h + disc.sqrt()) / a) {
+		if !t_int.surrounds(h - disc.sqrt() / a) {
+			if !t_int.surrounds((h + disc.sqrt()) / a) {
 				return None;
 			}
 			ret.t = (h + disc.sqrt()) / a;

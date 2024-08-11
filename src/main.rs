@@ -7,6 +7,7 @@ mod vec3;
 mod ray;
 mod geometry;
 mod hit;
+mod camera;
 
 fn color_at(r: Ray, w: &World) -> Vec3 {
     let possible_hit = w.hit(r, Interval::new(0.0, f64::INFINITY));
