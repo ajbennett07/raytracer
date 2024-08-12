@@ -75,9 +75,9 @@ impl std::ops::Div<Self> for Vec3 {
 
 impl Color {
 	pub fn write_color(&self) -> String {
-		let r = self.0 * 255.0;
-		let g = self.1 * 255.0;
-		let b = self.2 * 255.0;
+		let r = self.0.sqrt() * 255.0;
+		let g = self.1.sqrt() * 255.0;
+		let b = self.2.sqrt() * 255.0;
 		format!("{:.0} {1:.0} {2:.0}",r,g,b)
 	}
 }

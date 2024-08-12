@@ -8,10 +8,13 @@ mod geometry;
 mod hit;
 mod camera;
 
+extern crate image;
+extern crate rand;
+
 fn main() {
 
     //Init camera 
-    let mut cam = Camera::new(400, 16.0/9.0,1.0,2.0);
+    let mut cam = Camera::new(400, 16.0/9.0,1.0,2.0,10);
     cam.init();
 
     //Init World
@@ -23,6 +26,7 @@ fn main() {
     //Render image and write to ppm
     //TODO: implement support for other image formats
     cam.render(&world);
-    cam.image().out_ppm("out.ppm");
+    //cam.image().out_ppm("out.ppm");
+    cam.image().out_png("out.png");
 
 }

@@ -120,7 +120,7 @@ impl Hittable for Triangle {
 		if t_int.contains(t) {
 			return Some(
 				Hit {
-					norm: e1.cross(e2),
+					norm: e1.cross(e2).normalize(),
 					point: r.at(t),
 					t: t
 				}

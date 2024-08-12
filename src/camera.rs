@@ -4,6 +4,7 @@ use crate::ray::Ray;
 use crate::hit::Hittable;
 use crate::geometry::*;
 use std::fs;
+use rand::prelude::*;
 
 #[derive(Debug,Clone)]
 pub struct Camera {
@@ -24,10 +25,11 @@ pub struct Camera {
     vw_ul_corner: Vec3,
     cntr_frst_px: Vec3,
 
+	anti_alias_str: u64,
 }
 
 impl Camera {
-	pub fn new(width: i64, asp_ratio: f64, focal_len: f64, view_height: f64) -> Self {
+	pub fn new(width: i64, asp_ratio: f64, focal_len: f64, view_height: f64, anti: u64) -> Self {
 		Self{ 
 			image_width: width,
 			aspect_ratio: asp_ratio,
@@ -44,6 +46,8 @@ impl Camera {
 			pixel_delta_ver: Vec3::zero(),
 			vw_ul_corner: Vec3::zero(),
 			cntr_frst_px: Vec3::zero(),
+
+			anti_alias_str: anti,
 		}
 	}
 	pub fn init(&mut self) {
@@ -64,13 +68,17 @@ impl Camera {
 		self.img_data.w = self.image_width;
 	}
 	pub fn render(&mut self, w: &World) {
+		let mut rng = rand::thread_rng();
 		for j in 0..self.image_height {
 			for i in 0..self.image_width {
 				let px_cntr = self.cntr_frst_px + (self.pixel_delta_hor * i as f64) + (self.pixel_delta_ver * j as f64);
 				let ray_dir = px_cntr - self.camera_center;
 				let px_ray = Ray::new(self.camera_center,ray_dir);
 	
-				let px_color = Self::color_at(px_ray, &w);
+				let mut rays: Vec<Ray> = (0..self.anti_alias_str).map(|_| Ray { origin: px_ray.origin, dir: px_cntr + (self.pixel_delta_ver * rng.gen_range(-0.5..0.5)) + (self.pixel_delta_hor * rng.gen_range(-0.5..0.5)) - self.camera_center}).collect();
+				rays.push(px_ray);
+
+				let px_color = rays.iter().map(|r| Self::color_at(*r, w)).fold(Vec3::zero(), |acc, c| acc + c) / rays.len() as f64;
 				self.img_data.data.push(px_color);
 			}   
 		}
@@ -113,5 +121,9 @@ impl Image {
 		let mut out :Vec<String> = vec![format!("P3\n{} {}\n255",self.w,self.h)];
 		self.data.iter().for_each(|p| out.push(p.write_color()));
 		fs::write(file_name,out.join("\n")).unwrap();
+	}
+	pub fn out_png(self, file_name: &str) {
+		let buf: Vec<u8> = self.data.iter().map(|p| vec![p.0,p.1,p.2]).flatten().map(|f| (f.sqrt() * 255.0) as u8).collect();
+		image::save_buffer(file_name, &buf, self.w as u32, self.h as u32, image::ExtendedColorType::Rgb8).unwrap();
 	}
 }
